@@ -56,3 +56,7 @@ real_simulator.py
 real_*.csv
 real_*.png
 real_*.json
+
+# ── Tracked custom Streamlit components ────────────────────────────────────────
+!well_schematic_component/
+!well_schematic_component/*

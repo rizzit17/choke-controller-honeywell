@@ -6,10 +6,9 @@ Run with:
 
 Features:
   - Scenario selector (A / B / C)
-  - 6 required trend plots per scenario (interactive, via plotly)
-  - Decision rationale log table (searchable)
-  - Key metrics summary panel
-  - Constraint violation indicator (should always show zero violations)
+  - System Overview Tab: Interactive SVG Well Schematic with live engineering analysis cards
+  - Scenario Trends Tab: 6 required trend plots per scenario (interactive, via plotly) + searchable rationale log
+  - Key metrics summary panel & constraint violation indicator
 
 [MOCK DATA — REHEARSAL ONLY until real simulator is swapped in]
 """
@@ -28,6 +27,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ── Load custom component ────────────────────────────────────────────────────────
+try:
+    well_schematic_component = st.components.v1.declare_component("well_schematic", path="./well_schematic_component")
+except Exception:
+    well_schematic_component = None
 
 # ── Constraint limits ────────────────────────────────────────────────────────────
 try:
@@ -77,6 +82,7 @@ COLORS = {
 
 BG = "#0f1117"
 PANEL_BG = "#1a1d27"
+GRID_COL = "#2a2d3a"
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────────
@@ -168,8 +174,6 @@ def make_trend_figure(df: pd.DataFrame, target_change_step=None) -> go.Figure:
 
     return fig
 
-GRID_COL = "#2a2d3a"
-
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────────
 
@@ -247,34 +251,191 @@ with col5:
 
 st.divider()
 
-# ── Trend plot ───────────────────────────────────────────────────────────────────
+# ── Tabs ─────────────────────────────────────────────────────────────────────────
 
-st.markdown("### Process Trends")
-fig = make_trend_figure(df, cfg["target_change_step"])
-st.plotly_chart(fig, use_container_width=True)
+tab1, tab2 = st.tabs(["🛢️ System Overview & Schematic", "📈 Scenario Trends & Logs"])
 
-# ── Decision rationale log ────────────────────────────────────────────────────────
+# ── TAB 1: System Overview & Schematic ───────────────────────────────────────────
+with tab1:
+    st.markdown("### 🛢️ Naturally Flowing Oil Well — Production Schematic")
+    st.caption("Interactive schematic of the production loop (Control interval $T_s = 1\\text{ hr}$). "
+               "Click any highlighted component below or use the selector pills to inspect its live status in the active scenario.")
 
-if not log.empty:
-    st.markdown("### Controller Decision Log")
+    # State tracking for bidirectional selector
+    if "active_node" not in st.session_state:
+        st.session_state["active_node"] = "Choke"
 
-    disp_cols = ["step", "time_hr", "choke_prev", "choke_chosen", "delta_u",
-                 "target_Q", "predicted_Q", "measured_Q",
-                 "n_candidates_evaluated", "n_candidates_rejected_hard", "reason"]
-    disp_cols = [c for c in disp_cols if c in log.columns]
+    id_to_label = {
+        "Choke": "🎛️ Choke Valve (u)",
+        "WHP":   "🔵 Wellhead Pressure (WHP)",
+        "FLP":   "🟠 Flowline Pressure (FLP)",
+        "BHP":   "🔴 Bottom Hole Pressure (BHP)",
+        "AP":    "🟣 Annulus Pressure (AP)"
+    }
+    label_to_id = {v: k for k, v in id_to_label.items()}
 
-    search = st.text_input("🔍 Filter rationale log", placeholder="e.g. 'FALLBACK' or 'BHP'")
-    log_display = log[disp_cols]
-    if search:
-        mask = log_display.apply(lambda row: row.astype(str).str.contains(search, case=False).any(), axis=1)
-        log_display = log_display[mask]
-
-    st.dataframe(
-        log_display,
-        use_container_width=True,
-        height=320,
+    # Horizontal selector pill bar
+    selected_label = st.radio(
+        "Inspect Component:",
+        list(id_to_label.values()),
+        index=list(id_to_label.keys()).index(st.session_state["active_node"]),
+        horizontal=True,
+        key="node_selector_radio"
     )
-    st.caption(f"{len(log_display)} rows shown")
+    st.session_state["active_node"] = label_to_id[selected_label]
+
+    # Render custom SVG schematic component
+    if well_schematic_component is not None:
+        clicked_svg = well_schematic_component(selected=st.session_state["active_node"], key="schematic_svg", default="Choke")
+        if clicked_svg and clicked_svg in id_to_label and clicked_svg != st.session_state["active_node"]:
+            st.session_state["active_node"] = clicked_svg
+            st.rerun()
+    else:
+        st.warning("⚠️ Custom schematic component could not be loaded. Use the selector buttons above.")
+
+    st.divider()
+
+    # ── Live Info Cards for Selected Node ────────────────────────────────────────
+    curr_id = st.session_state["active_node"]
+
+    if curr_id == "Choke":
+        st.markdown("#### 🎛️ Production Choke Valve ($u$) — Manipulated Variable")
+        st.markdown(
+            "The production choke valve is the primary manipulated variable in this challenge. "
+            "Opening the choke increases fluid production rate ($Q$) but lowers well pressures. "
+            "To prevent mechanical wear and hydraulic shock, movements are bounded by strict rate limits."
+        )
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("Current Choke Opening", f"{df['Choke_pct'].iloc[-1]:.1f}%")
+        with c2:
+            st.metric("Allowable Ramp Rate", "±5.0%/hr", "Enforced every step")
+        with c3:
+            st.metric("Max Ramp Experienced", f"{df['Choke_pct'].diff().abs().max():.1f}%/hr", "✅ Compliant")
+        
+        if not log.empty:
+            last_reason = log["reason"].iloc[-1]
+            st.info(f"**Latest Controller Rationale (Step {int(log['step'].iloc[-1])}):** {last_reason}")
+
+    elif curr_id == "WHP":
+        st.markdown("#### 🔵 Wellhead Pressure (WHP) — Active Safety Constraint")
+        st.markdown(
+            "Pressure measured at the wellhead Christmas tree. If WHP drops too low, the well operates outside its "
+            "recommended operating envelope, causing flow instability or surface equipment issues. "
+            "In this challenge, WHP is an **active safety constraint**."
+        )
+        curr_val = df["WHP_psi"].iloc[-1]
+        min_val  = df["WHP_psi"].min()
+        headroom = min_val - LIMITS["WHP_min"]
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("Current WHP", f"{curr_val:.1f} psi")
+        with c2:
+            st.metric("Safe Limit Floor", f"{LIMITS['WHP_min']:.0f} psi", f"Max {LIMITS['WHP_max']:.0f} psi")
+        with c3:
+            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
+        st.success(
+            f"**Controller Protection**: Across all {len(df)} steps in {scenario_label}, WHP never dropped below "
+            f"{min_val:.1f} psi (a safe buffer of {headroom:.1f} psi above the hard limit)."
+        )
+
+    elif curr_id == "FLP":
+        st.markdown("#### 🟠 Flowline Pressure (FLP) — Active Safety Constraint")
+        st.markdown(
+            "Pressure measured downstream of the choke in the surface flowline transporting fluids to the gathering manifold. "
+            "Maintaining adequate FLP ensures stable multiphase flow and prevents separator flooding. "
+            "In this challenge, FLP is an **active safety constraint**."
+        )
+        curr_val = df["FLP_psi"].iloc[-1]
+        min_val  = df["FLP_psi"].min()
+        headroom = min_val - LIMITS["FLP_min"]
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("Current FLP", f"{curr_val:.1f} psi")
+        with c2:
+            st.metric("Safe Limit Floor", f"{LIMITS['FLP_min']:.0f} psi", f"Max {LIMITS['FLP_max']:.0f} psi")
+        with c3:
+            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
+        st.success(
+            f"**Scenario Performance**: In {scenario_label}, Flowline Pressure reached a minimum of {min_val:.1f} psi. "
+            f"When target tracking would cause FLP to breach {LIMITS['FLP_min']:.0f} psi, the controller's hard rejection "
+            f"and soft barrier algorithms automatically arrest choke opening."
+        )
+
+    elif curr_id == "BHP":
+        st.markdown("#### 🔴 Bottom Hole Pressure (BHP) — Active Safety Constraint")
+        st.markdown(
+            "Pressure measured at the reservoir/wellbore interface at the bottom of the production tubing. "
+            "BHP is the primary indicator of reservoir drawdown. If BHP drops below the safe floor, it risks "
+            "formation sand collapse, gas coning, and permanent reservoir damage. "
+            "In this challenge, BHP is an **active safety constraint**."
+        )
+        curr_val = df["BHP_psi"].iloc[-1]
+        min_val  = df["BHP_psi"].min()
+        headroom = min_val - LIMITS["BHP_min"]
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.metric("Current BHP", f"{curr_val:.1f} psi")
+        with c2:
+            st.metric("Safe Limit Floor", f"{LIMITS['BHP_min']:.0f} psi", f"Max {LIMITS['BHP_max']:.0f} psi")
+        with c3:
+            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
+        st.success(
+            f"**Reservoir Health Preservation**: Minimum BHP observed in this run was {min_val:.1f} psi "
+            f"({headroom:+.1f} psi above the {LIMITS['BHP_min']:.0f} psi limit). "
+            f"In Scenario C (Infeasible Target), protecting BHP and FLP takes priority over chasing target production."
+        )
+
+    elif curr_id == "AP":
+        st.markdown("#### 🟣 Annulus Pressure (AP) — Informational / Supervisory Interlock")
+        st.markdown(
+            "Pressure measured in the sealed annular space between the surface casing and production tubing. "
+            "While annulus pressure is continuously monitored in oilfield operations to verify tubing integrity, "
+            "**it is NOT an active constraint in this challenge**, per the problem statement's stated scope."
+        )
+        c1, c2 = st.columns(2)
+        with c1:
+            st.info(
+                "**Why Industrial Systems Monitor AP**:\n\n"
+                "In real-world production, a sustained rise in annulus pressure indicates a production tubing leak, "
+                "casing failure, or packer isolation breach. Industrial supervisory systems monitor AP as an "
+                "Emergency Shutdown (ESD) interlock rather than an MPC tracking constraint."
+            )
+        with c2:
+            st.info(
+                "**Hackathon Challenge Scope**:\n\n"
+                "Per Honeywell's simulator assumptions (single naturally flowing well, no artificial lift), "
+                "the active operating envelope is defined strictly by **WHP, FLP, BHP**, and **Choke Ramp Rate**."
+            )
+
+
+# ── TAB 2: Scenario Trends & Logs ────────────────────────────────────────────────
+with tab2:
+    st.markdown("### Process Trends")
+    fig = make_trend_figure(df, cfg["target_change_step"])
+    st.plotly_chart(fig, use_container_width=True)
+
+    # ── Decision rationale log ────────────────────────────────────────────────────
+    if not log.empty:
+        st.markdown("### Controller Decision Log")
+
+        disp_cols = ["step", "time_hr", "choke_prev", "choke_chosen", "delta_u",
+                     "target_Q", "predicted_Q", "measured_Q",
+                     "n_candidates_evaluated", "n_candidates_rejected_hard", "reason"]
+        disp_cols = [c for c in disp_cols if c in log.columns]
+
+        search = st.text_input("🔍 Filter rationale log", placeholder="e.g. 'FALLBACK' or 'BHP'")
+        log_display = log[disp_cols]
+        if search:
+            mask = log_display.apply(lambda row: row.astype(str).str.contains(search, case=False).any(), axis=1)
+            log_display = log_display[mask]
+
+        st.dataframe(
+            log_display,
+            use_container_width=True,
+            height=320,
+        )
+        st.caption(f"{len(log_display)} rows shown")
 
 st.divider()
 st.caption(

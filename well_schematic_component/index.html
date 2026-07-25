@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oil Well Production Schematic</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  .schematic-container {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+    background: #1a1d27;
+    border: 1px solid #3a3d4d;
+    border-radius: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .interactive-node {
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .interactive-node:hover {
+    filter: drop-shadow(0 0 8px currentColor);
+    opacity: 0.95;
+  }
+  .interactive-node.active {
+    filter: drop-shadow(0 0 12px currentColor);
+    stroke-width: 2.5px !important;
+  }
+  .node-label {
+    font-size: 11px;
+    font-weight: 600;
+    fill: #ffffff;
+    pointer-events: none;
+    text-anchor: middle;
+  }
+  .node-sublabel {
+    font-size: 9px;
+    fill: #9ca3af;
+    pointer-events: none;
+    text-anchor: middle;
+  }
+  .static-label {
+    font-size: 10px;
+    fill: #6b7280;
+    pointer-events: none;
+  }
+  /* Pulse animation for active flow */
+  @keyframes pulse-flow {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.3; }
+  }
+  .flow-dots {
+    animation: pulse-flow 3s infinite ease-in-out;
+  }
+</style>
+</head>
+<body>
+
+<div class="schematic-container">
+  <svg viewBox="0 0 900 480" xmlns="http://www.w3.org/2000/svg">
+    <!-- ── BACKGROUND & STRATA ────────────────────────────────────────────────── -->
+    <rect x="0" y="0" width="900" height="480" fill="#141720" rx="6"/>
+    
+    <!-- Surface line (Ground level) -->
+    <line x1="0" y1="160" x2="900" y2="160" stroke="#3a3d4d" stroke-width="2" stroke-dasharray="6,4"/>
+    <text x="15" y="152" class="static-label" fill="#9ca3af">SURFACE (GROUND LEVEL)</text>
+    <text x="15" y="175" class="static-label" fill="#6b7280">SUBSURFACE</text>
+    
+    <!-- Reservoir strata formation -->
+    <path d="M 0 340 Q 200 320, 450 350 T 900 330 L 900 480 L 0 480 Z" fill="#201b13" opacity="0.8"/>
+    <path d="M 0 380 Q 250 360, 500 390 T 900 370 L 900 480 L 0 480 Z" fill="#282117" opacity="0.9"/>
+    <text x="750" y="420" class="static-label" fill="#a18058" font-size="12px" font-weight="bold">OIL RESERVOIR</text>
+    
+    <!-- Reservoir oil bubbles/dots -->
+    <g fill="#a18058" opacity="0.3" class="flow-dots">
+      <circle cx="80" cy="400" r="3"/><circle cx="120" cy="430" r="2.5"/><circle cx="160" cy="390" r="3.5"/>
+      <circle cx="210" cy="450" r="2"/><circle cx="580" cy="410" r="3"/><circle cx="640" cy="440" r="3.5"/>
+      <circle cx="700" cy="390" r="2.5"/><circle cx="820" cy="450" r="3"/><circle cx="860" cy="410" r="2"/>
+    </g>
+
+    <!-- ── SUBSURFACE CASING & TUBING ─────────────────────────────────────────── -->
+    <!-- Surface Casing (Outer) -->
+    <rect x="235" y="160" width="90" height="110" fill="#252836" stroke="#4b5563" stroke-width="2"/>
+    <text x="180" y="215" class="static-label" text-anchor="end">Surface Casing</text>
+    <line x1="185" y1="211" x2="235" y2="211" stroke="#4b5563" stroke-width="1" stroke-dasharray="2,2"/>
+    
+    <!-- Intermediate Casing -->
+    <rect x="245" y="160" width="70" height="180" fill="#1e212d" stroke="#6b7280" stroke-width="2"/>
+    <text x="180" y="295" class="static-label" text-anchor="end">Intermediate Casing</text>
+    <line x1="185" y1="291" x2="245" y2="291" stroke="#6b7280" stroke-width="1" stroke-dasharray="2,2"/>
+
+    <!-- Production Tubing (Inner Pipe) -->
+    <rect x="265" y="130" width="30" height="310" fill="#111827" stroke="#34d399" stroke-width="2"/>
+    <text x="350" y="320" class="static-label" fill="#34d399">Production Tubing</text>
+    <line x1="295" y1="316" x2="345" y2="316" stroke="#34d399" stroke-width="1" stroke-dasharray="2,2"/>
+    
+    <!-- Fluid flow arrows upwards in tubing -->
+    <g stroke="#34d399" stroke-width="2" fill="none" opacity="0.8" class="flow-dots">
+      <path d="M 280 410 L 280 380 M 276 386 L 280 380 L 284 386"/>
+      <path d="M 280 350 L 280 320 M 276 326 L 280 320 L 284 326"/>
+      <path d="M 280 290 L 280 260 M 276 266 L 280 260 L 284 266"/>
+      <path d="M 280 230 L 280 200 M 276 206 L 280 200 L 284 206"/>
+    </g>
+
+    <!-- Perforations (Bottom Hole Inflow) -->
+    <g stroke="#f87171" stroke-width="2">
+      <line x1="240" y1="400" x2="265" y2="400"/><polygon points="265,400 259,397 259,403" fill="#f87171"/>
+      <line x1="240" y1="420" x2="265" y2="420"/><polygon points="265,420 259,417 259,423" fill="#f87171"/>
+      <line x1="320" y1="400" x2="295" y2="400"/><polygon points="295,400 301,397 301,403" fill="#f87171"/>
+      <line x1="320" y1="420" x2="295" y2="420"/><polygon points="295,420 301,417 301,423" fill="#f87171"/>
+    </g>
+
+
+    <!-- ── SURFACE FACILITIES (FLOWLINE, MANIFOLD, SEPARATOR) ─────────────────── -->
+    <!-- Wellhead Assembly (Christmas Tree) -->
+    <rect x="258" y="80" width="44" height="50" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="3"/>
+    <line x1="245" y1="105" x2="315" y2="105" stroke="#60a5fa" stroke-width="3"/>
+    
+    <!-- Flowline piping horizontally to right -->
+    <path d="M 302 105 L 530 105 L 530 135 L 680 135" fill="none" stroke="#f59e0b" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M 302 105 L 530 105 L 530 135 L 680 135" fill="none" stroke="#1f2937" stroke-width="4" stroke-linejoin="round"/>
+    
+    <!-- Gathering Manifold Junction -->
+    <rect x="515" y="120" width="30" height="30" fill="#374151" stroke="#9ca3af" stroke-width="2" rx="4"/>
+    <text x="530" y="168" class="static-label" text-anchor="middle">Gathering Manifold</text>
+
+    <!-- Separator Vessel -->
+    <rect x="680" y="100" width="140" height="70" rx="35" fill="#1f2937" stroke="#9ca3af" stroke-width="2"/>
+    <line x1="700" y1="170" x2="700" y2="190" stroke="#9ca3af" stroke-width="4"/>
+    <line x1="800" y1="170" x2="800" y2="190" stroke="#9ca3af" stroke-width="4"/>
+    <line x1="685" y1="190" x2="715" y2="190" stroke="#9ca3af" stroke-width="3"/>
+    <line x1="785" y1="190" x2="815" y2="190" stroke="#9ca3af" stroke-width="3"/>
+    <text x="750" y="140" class="node-label" fill="#e5e7eb">SEPARATOR</text>
+    <text x="750" y="153" class="node-sublabel">3-Phase Vessel</text>
+
+
+    <!-- ── INTERACTIVE CLICKABLE REGIONS (THE 5 SENSORS/VALVES) ───────────────── -->
+
+    <!-- 1. PRODUCTION CHOKE VALVE (u) - Manipulated Variable -->
+    <g id="Choke" class="interactive-node" onclick="selectNode('Choke')" color="#a78bfa">
+      <rect x="385" y="65" width="70" height="80" fill="transparent" rx="6"/>
+      <!-- Valve body (bow tie) -->
+      <polygon points="400,90 400,120 440,90 440,120" fill="#2e1065" stroke="#a78bfa" stroke-width="2.5"/>
+      <!-- Valve actuator dome/wheel -->
+      <line x1="420" y1="105" x2="420" y2="78" stroke="#a78bfa" stroke-width="2.5"/>
+      <path d="M 405 78 Q 420 68 435 78 Z" fill="#a78bfa"/>
+      <!-- Glowing ring background -->
+      <circle cx="420" cy="98" r="28" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>
+      <text x="420" y="52" class="node-label" fill="#a78bfa">CHOKE VALVE (u)</text>
+      <text x="420" y="64" class="node-sublabel" fill="#ddd6fe">Manipulated Variable</text>
+    </g>
+
+    <!-- 2. WELLHEAD PRESSURE (WHP) - Active Constraint -->
+    <g id="WHP" class="interactive-node" onclick="selectNode('WHP')" color="#60a5fa">
+      <circle cx="280" cy="45" r="22" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2.5"/>
+      <circle cx="280" cy="45" r="18" fill="none" stroke="#60a5fa" stroke-width="0.7" opacity="0.5"/>
+      <line x1="280" y1="67" x2="280" y2="80" stroke="#60a5fa" stroke-width="2.5"/>
+      <!-- Gauge needle -->
+      <line x1="280" y1="45" x2="292" y2="35" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="280" cy="45" r="3" fill="#ffffff"/>
+      <text x="280" y="15" class="node-label" fill="#60a5fa">WHP GAUGE</text>
+      <text x="280" y="27" class="node-sublabel" fill="#bfdbfe">Active Constraint</text>
+    </g>
+
+    <!-- 3. FLOWLINE PRESSURE (FLP) - Active Constraint -->
+    <g id="FLP" class="interactive-node" onclick="selectNode('FLP')" color="#f59e0b">
+      <circle cx="485" cy="65" r="22" fill="#78350f" stroke="#f59e0b" stroke-width="2.5"/>
+      <circle cx="485" cy="65" r="18" fill="none" stroke="#f59e0b" stroke-width="0.7" opacity="0.5"/>
+      <line x1="485" y1="87" x2="485" y2="105" stroke="#f59e0b" stroke-width="2.5"/>
+      <!-- Gauge needle -->
+      <line x1="485" y1="65" x2="495" y2="52" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="485" cy="65" r="3" fill="#ffffff"/>
+      <text x="485" y="32" class="node-label" fill="#f59e0b">FLP GAUGE</text>
+      <text x="485" y="44" class="node-sublabel" fill="#fde68a">Active Constraint</text>
+    </g>
+
+    <!-- 4. BOTTOM HOLE PRESSURE (BHP) - Active Constraint -->
+    <g id="BHP" class="interactive-node" onclick="selectNode('BHP')" color="#f87171">
+      <rect x="140" y="385" width="115" height="55" fill="#450a0a" stroke="#f87171" stroke-width="2" rx="6" opacity="0.95"/>
+      <!-- Sensor target line -->
+      <line x1="255" y1="412" x2="280" y2="412" stroke="#f87171" stroke-width="2" stroke-dasharray="3,2"/>
+      <circle cx="280" cy="412" r="5" fill="#f87171"/>
+      <text x="197" y="408" class="node-label" fill="#f87171">BHP SENSOR</text>
+      <text x="197" y="422" class="node-sublabel" fill="#fecaca">Active Constraint (Drawdown)</text>
+    </g>
+
+    <!-- 5. ANNULUS PRESSURE (AP) - Informational / Supervisory -->
+    <g id="AP" class="interactive-node" onclick="selectNode('AP')" color="#c084fc">
+      <circle cx="205" cy="115" r="20" fill="#4c1d95" stroke="#c084fc" stroke-width="2"/>
+      <line x1="225" y1="115" x2="250" y2="175" stroke="#c084fc" stroke-width="2" stroke-dasharray="3,2"/>
+      <!-- Gauge needle -->
+      <line x1="205" y1="115" x2="213" y2="105" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="205" cy="115" r="2.5" fill="#ffffff"/>
+      <text x="145" y="112" class="node-label" fill="#c084fc" text-anchor="middle">AP GAUGE</text>
+      <text x="145" y="124" class="node-sublabel" fill="#e9d5ff" text-anchor="middle">Informational Only</text>
+    </g>
+
+  </svg>
+</div>
+
+<script>
+  let currentNode = "Choke";
+
+  function sendToStreamlit(value) {
+    window.parent.postMessage({
+      isStreamlitMessage: true,
+      type: "streamlit:setComponentValue",
+      value: value
+    }, "*");
+  }
+
+  function setFrameHeight() {
+    window.parent.postMessage({
+      isStreamlitMessage: true,
+      type: "streamlit:setFrameHeight",
+      height: document.body.scrollHeight + 10
+    }, "*");
+  }
+
+  function selectNode(nodeId) {
+    currentNode = nodeId;
+    document.querySelectorAll(".interactive-node").forEach(el => {
+      if (el.id === nodeId) {
+        el.classList.add("active");
+      } else {
+        el.classList.remove("active");
+      }
+    });
+    sendToStreamlit(nodeId);
+  }
+
+  // Listen for initial render or updates from Streamlit (if user clicked pill buttons)
+  window.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "streamlit:render") {
+      const args = event.data.args;
+      if (args && args.selected) {
+        if (args.selected !== currentNode) {
+          currentNode = args.selected;
+          document.querySelectorAll(".interactive-node").forEach(el => {
+            if (el.id === currentNode) {
+              el.classList.add("active");
+            } else {
+              el.classList.remove("active");
+            }
+          });
+        }
+      }
+      setFrameHeight();
+    }
+  });
+
+  // Initialize
+  window.addEventListener("load", () => {
+    selectNode("Choke");
+    setFrameHeight();
+  });
+</script>
+</body>
+</html>
