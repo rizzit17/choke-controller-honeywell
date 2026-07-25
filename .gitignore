@@ -1,0 +1,58 @@
+# ── Python cache ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env
+
+# ── Private strategy & build docs (do NOT publish) ────────────────────────────
+Choke_Controller_Master_Prompt.md
+Choke_Controller_Master_Prompt.md.pdf
+12_Hour_Build_Guide.md
+
+# ── Organizer-provided files (not ours to redistribute) ───────────────────────
+*.docx
+*.xlsx
+*.pptx
+
+# ── Generated data outputs (reproducible by running the pipeline) ─────────────
+mock_step_test_data.csv
+mock_model_params.json
+mock_scenario_A.csv
+mock_scenario_A_rationale.csv
+mock_scenario_B.csv
+mock_scenario_B_rationale.csv
+mock_scenario_C.csv
+mock_scenario_C_rationale.csv
+
+# ── Interim/superseded plots (mock_final_ PNGs are the clean versions) ─────────
+mock_scenario_A_plot.png
+mock_scenario_B_plot.png
+mock_scenario_C_plot.png
+
+# ── Internal debugging / one-off scripts ──────────────────────────────────────
+compare_analysis.py
+patch_utf8.py
+
+# ── IDE / OS noise ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Real simulator (will be added locally at hackathon, never committed) ───────
+real_simulator.py
+real_*.csv
+real_*.png
+real_*.json
