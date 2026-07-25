@@ -264,6 +264,10 @@ with tab1:
     # State tracking for bidirectional selector
     if "active_node" not in st.session_state:
         st.session_state["active_node"] = "Choke"
+    if "last_radio_val" not in st.session_state:
+        st.session_state["last_radio_val"] = "Choke"
+    if "last_svg_val" not in st.session_state:
+        st.session_state["last_svg_val"] = "Choke"
 
     id_to_label = {
         "Choke": "🎛️ Choke Valve (u)",
@@ -282,13 +286,23 @@ with tab1:
         horizontal=True,
         key="node_selector_radio"
     )
-    st.session_state["active_node"] = label_to_id[selected_label]
+    current_radio = label_to_id[selected_label]
+
+    # Did user just click the radio button?
+    if current_radio != st.session_state["last_radio_val"]:
+        st.session_state["active_node"] = current_radio
+        st.session_state["last_radio_val"] = current_radio
+        st.session_state["last_svg_val"] = current_radio
+        st.rerun()
 
     # Render custom SVG schematic component
     if well_schematic_component is not None:
-        clicked_svg = well_schematic_component(selected=st.session_state["active_node"], key="schematic_svg", default="Choke", height=540)
-        if clicked_svg and clicked_svg in id_to_label and clicked_svg != st.session_state["active_node"]:
+        clicked_svg = well_schematic_component(selected=st.session_state["active_node"], key="schematic_svg", default=st.session_state["active_node"], height=540)
+        # Did user just click the SVG diagram?
+        if clicked_svg and clicked_svg in id_to_label and clicked_svg != st.session_state["last_svg_val"]:
             st.session_state["active_node"] = clicked_svg
+            st.session_state["last_svg_val"] = clicked_svg
+            st.session_state["last_radio_val"] = clicked_svg
             st.rerun()
     else:
         st.warning("⚠️ Custom schematic component could not be loaded. Use the selector buttons above.")
