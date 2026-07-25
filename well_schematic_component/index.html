@@ -216,6 +216,14 @@
 <script>
   let currentNode = "Choke";
 
+  function notifyReady() {
+    window.parent.postMessage({
+      isStreamlitMessage: true,
+      type: "streamlit:componentReady",
+      apiVersion: 1
+    }, "*");
+  }
+
   function sendToStreamlit(value) {
     window.parent.postMessage({
       isStreamlitMessage: true,
@@ -228,7 +236,7 @@
     window.parent.postMessage({
       isStreamlitMessage: true,
       type: "streamlit:setFrameHeight",
-      height: document.body.scrollHeight + 10
+      height: document.body.scrollHeight + 15
     }, "*");
   }
 
@@ -244,7 +252,7 @@
     sendToStreamlit(nodeId);
   }
 
-  // Listen for initial render or updates from Streamlit (if user clicked pill buttons)
+  // Listen for initial render or updates from Streamlit
   window.addEventListener("message", (event) => {
     if (event.data && event.data.type === "streamlit:render") {
       const args = event.data.args;
@@ -264,9 +272,15 @@
     }
   });
 
-  // Initialize
-  window.addEventListener("load", () => {
+  // Initialize immediately and on load
+  notifyReady();
+  window.addEventListener("DOMContentLoaded", () => {
+    notifyReady();
     selectNode("Choke");
+    setFrameHeight();
+  });
+  window.addEventListener("load", () => {
+    notifyReady();
     setFrameHeight();
   });
 </script>

@@ -286,7 +286,7 @@ with tab1:
 
     # Render custom SVG schematic component
     if well_schematic_component is not None:
-        clicked_svg = well_schematic_component(selected=st.session_state["active_node"], key="schematic_svg", default="Choke")
+        clicked_svg = well_schematic_component(selected=st.session_state["active_node"], key="schematic_svg", default="Choke", height=540)
         if clicked_svg and clicked_svg in id_to_label and clicked_svg != st.session_state["active_node"]:
             st.session_state["active_node"] = clicked_svg
             st.rerun()
