@@ -1,0 +1,33 @@
+name: Industrial Constraint Validation CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test-constraints:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: "pip"
+
+    - name: Install project dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Verify syntax of core modules
+      run: |
+        python -m py_compile dashboard.py controller.py model.py run_scenarios.py step_test_harness.py
+
+    - name: Run 20/20 MPC constraint validation test suite
+      run: |
+        python test_constraints_and_compare.py
