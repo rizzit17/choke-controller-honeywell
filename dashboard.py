@@ -395,9 +395,9 @@ with tab1:
         with c3:
             st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
         st.success(
-            f"**Reservoir Health Preservation**: Minimum BHP observed in this run was {min_val:.1f} psi "
+            f"**Reservoir Health Preservation**: In {scenario_label}, minimum BHP observed in this run was {min_val:.1f} psi "
             f"({headroom:+.1f} psi above the {LIMITS['BHP_min']:.0f} psi limit). "
-            f"In Scenario C (Infeasible Target), protecting BHP and FLP takes priority over chasing target production."
+            f"Whenever target tracking approaches a constraint floor, our MPC algorithms automatically prioritize protecting BHP and FLP over chasing production targets."
         )
 
     elif curr_id == "AP":
