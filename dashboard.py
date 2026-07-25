@@ -214,13 +214,11 @@ st.markdown(
 )
 st.caption(cfg["desc"])
 
-# Check files exist
-if not os.path.exists(cfg["trend"]):
-    st.error(
-        f"Data file `{cfg['trend']}` not found. "
-        "Run `python run_scenarios.py` first."
-    )
-    st.stop()
+# Check files exist (automatic self-healing for cloud deployment)
+if not os.path.exists(cfg["trend"]) or not os.path.exists(cfg["log"]):
+    with st.spinner("⏳ Generating scenario simulation data for cloud setup..."):
+        import subprocess
+        subprocess.run(["python", "run_scenarios.py"], check=True)
 
 df  = pd.read_csv(cfg["trend"])
 log = pd.read_csv(cfg["log"]) if os.path.exists(cfg["log"]) else pd.DataFrame()

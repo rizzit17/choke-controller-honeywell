@@ -115,9 +115,10 @@ def closed_loop_run(
 
 def run_all_scenarios():
     if not os.path.exists(STEP_TEST_CSV):
-        raise FileNotFoundError(
-            f"{STEP_TEST_CSV} not found. Run step_test_harness.py first."
-        )
+        print(f"{STEP_TEST_CSV} not found. Running step_test_harness.py and model.py automatically...")
+        import subprocess
+        subprocess.run(["python", "step_test_harness.py"], check=True)
+        subprocess.run(["python", "model.py"], check=True)
 
     print("Loading process model from step-test data...")
     process_model = load_model(STEP_TEST_CSV)

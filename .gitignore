@@ -24,15 +24,7 @@ Choke_Controller_Master_Prompt.md.pdf
 *.xlsx
 *.pptx
 
-# ── Generated data outputs (reproducible by running the pipeline) ─────────────
-mock_step_test_data.csv
-mock_model_params.json
-mock_scenario_A.csv
-mock_scenario_A_rationale.csv
-mock_scenario_B.csv
-mock_scenario_B_rationale.csv
-mock_scenario_C.csv
-mock_scenario_C_rationale.csv
+# ── Generated data outputs (tracked for live Streamlit Cloud demo) ──────────
 
 # ── Interim/superseded plots (mock_final_ PNGs are the clean versions) ─────────
 mock_scenario_A_plot.png
