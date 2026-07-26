@@ -137,15 +137,18 @@ If **all** candidates violate hard limits (infeasible target), the controller ho
 
 ## Safe Operating Limits
 
-| Variable | Minimum | Maximum |
-|---|---|---|
-| WHP (Wellhead Pressure) | 200 psi | 480 psi |
-| FLP (Flowline Pressure) | 150 psi | 350 psi |
-| BHP (Bottom Hole Pressure) | 2200 psi | 3000 psi |
-| Choke Opening | 0% | 100% |
-| Choke Ramp Rate | −5%/hr | +5%/hr |
+| Variable | Minimum | Maximum | Classification |
+|---|---|---|---|
+| **Choke Opening** | 0% | 100% | **Organizer-Specified** (`.docx`) |
+| **Choke Ramp Rate** | −5%/hr | +5%/hr | **Organizer-Specified** (`.docx`, $T_s=1\text{ hr}$) |
+| **WHP (Wellhead Pressure)** | 200 psi | 480 psi | **Working Assumption** (derived from dataset range) |
+| **FLP (Flowline Pressure)** | 150 psi | 350 psi | **Working Assumption** (derived from dataset range) |
+| **BHP (Bottom Hole Pressure)** | 2200 psi | 3000 psi | **Working Assumption** (derived from dataset range) |
 
-*Note: When real simulator is received, verify/update WHP/FLP/BHP limits from its documentation or by inspection of the step-test data range.*
+> **Note on Operating Envelope Limits**:
+> The problem statement (`.docx`) mandates that WHP, FLP, and BHP are active safety constraints, but deliberately leaves their exact numerical bounds to be dictated by the real simulator. 
+> The numeric bounds above are **our working assumptions for rehearsal**, established based on the reference dataset's observed operating range.
+> All safe operating limits are centralized in the `LIMITS` configuration dictionary in `mock_simulator.py` and `controller.py`. When the organizer's official simulator and exact limits are disclosed on hackathon day, updating the controller to the real limits is a **one-line configuration update**, requiring zero algorithm redesign.
 
 ---
 

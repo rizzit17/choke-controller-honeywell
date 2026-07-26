@@ -195,6 +195,8 @@ The Q steady-state curve is identical across variants — only the absolute pres
 
 **Final locked controller configuration**: `dead_band=3.0 bbl/hr`, `w_ramp=0.3`, `hard_margin=3.0 psi`
 
+*Note on Pressure Limits*: The problem statement mandates that WHP, FLP, and BHP are active constraints without fixing numeric values in the text. The numeric limits used throughout this stress test ($FLP_{\text{min}}=150\text{ psi}$, $BHP_{\text{min}}=2200\text{ psi}$, $WHP_{\text{min}}=200\text{ psi}$) represent **our working rehearsal assumptions** derived from the reference dataset range. They are centralized in `LIMITS` in `mock_simulator.py` / `controller.py` so updating to the real organizer limits is a one-line change.
+
 The hard_margin was set to 3.0 psi (effective FLP rejection threshold: 153 psi; BHP: 2203 psi) following a diagnostic of the pessimistic/C transient minimum. With `hard_margin=0.0`, the tightest observed FLP was 7.0 psi above the raw floor — however, a `hard_margin=5.0` analysis showed only 2.0 psi above the adjusted threshold at that transient minimum, insufficient given the noise band. `hard_margin=3.0` was selected as the conservative guard: it leaves **+4.0 psi above the adjusted 153 psi threshold** at the transient minimum, comfortably outside the ±1 psi noise floor, with zero spurious safety-fallback events confirmed.
 
 | Scenario | Variant | Final Q | Target | Err% | FLP settled (raw) | FLP transient (raw) | FLP transient (adj 153) | BHP settled | Chatter | Status |
