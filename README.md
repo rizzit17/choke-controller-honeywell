@@ -1,6 +1,6 @@
 # Autonomous Production Choke Controller
 
-> **Honeywell Hackathon Submission — Predictive, constraint-aware choke control for a naturally flowing oil well**
+> **Honeywell Hackathon Submission - Predictive, constraint-aware choke control for a naturally flowing oil well**
 
 ---
 
@@ -32,16 +32,16 @@ streamlit run dashboard.py
 
 | File | Purpose |
 |---|---|
-| `mock_simulator.py` | **Swap target** — replace import here when real simulator arrives |
+| `mock_simulator.py` | **Swap target** -replace import here when real simulator arrives |
 | `step_test_harness.py` | Runs designed step-test sequence, saves `mock_step_test_data.csv` |
 | `model.py` | Fits ARX process model from step-test CSV; exports `ProcessModel` class |
-| `controller.py` | `ChokeController` — brute-force MPC with constraint enforcement & rationale logging |
+| `controller.py` | `ChokeController` - brute-force MPC with constraint enforcement & rationale logging |
 | `run_scenarios.py` | Closed-loop runs of Scenarios A, B, C; saves trend + rationale CSVs |
 | `plot_scenarios.py` | Interim scenario plots (per-iteration) |
 | `plot_final.py` | **Final** 6-panel plots per scenario, saved as `mock_final_scenario_*.png` |
 | `dashboard.py` | Streamlit dashboard with interactive Plotly charts + decision log |
-| `test_constraints_and_compare.py` | Constraint validation suite — 20 tests (baseline), run after every parameter change |
-| `stress_test_all_variants.py` | 57-check robustness suite — 3 scenarios × 3 simulator variants (baseline/pessimistic/optimistic) |
+| `test_constraints_and_compare.py` | Constraint validation suite - 20 tests (baseline), run after every parameter change |
+| `stress_test_all_variants.py` | 57-check robustness suite - 3 scenarios × 3 simulator variants (baseline/pessimistic/optimistic) |
 
 **All output files prefixed `mock_` are rehearsal data only. Final deliverables use real simulator output.**
 
@@ -60,7 +60,7 @@ Only **three steps** are needed:
 3. In **`run_scenarios.py`**, same change.
 4. Re-run the pipeline top to bottom with `real_` prefixed output filenames.
 
-`model.py`, `controller.py`, `plot_scenarios.py`, and `dashboard.py` need **zero changes** — they only depend on the CSV interface, not on the simulator internals.
+`model.py`, `controller.py`, `plot_scenarios.py`, and `dashboard.py` need **zero changes** - they only depend on the CSV interface, not on the simulator internals.
 
 ---
 
@@ -76,9 +76,9 @@ Features per step:
 
 **Why ARX over a neural network or more complex model?**
 
-1. The process is a well-conditioned first-order dynamic system — a linear ARX model captures it accurately (R² > 0.97 on test data).
+1. The process is a well-conditioned first-order dynamic system - a linear ARX model captures it accurately (R² > 0.97 on test data).
 2. Brute-force candidate evaluation calls the model ~10 times per control step. Linear regression is near-instant; complex models add latency with no physical justification.
-3. ARX model parameters are interpretable — each coefficient has a clear engineering meaning. This directly supports Q&A defense.
+3. ARX model parameters are interpretable - each coefficient has a clear engineering meaning. This directly supports Q&A defense.
 4. The problem statement explicitly sanctions "simplified MPC based on brute-force candidate evaluation." Heavyweight nonlinear models are out of scope.
 
 ---
@@ -111,17 +111,17 @@ The soft barrier rises steeply as any pressure approaches its hard limit, steeri
 
 ### Dead-Band Engineering Decision
 
-During initial testing with a quadratic tracking cost and no dead-band, the controller exhibited **choke chattering**: after reaching the production target, the choke oscillated ±1–2% per step indefinitely rather than holding still. Root cause: once Q is within the noise floor (~±2 bbl/hr), the tracking cost and ramp cost are nearly equal for every candidate, so the controller alternates between adjacent choke positions on successive steps. This is not a safety issue — pressures remained within limits throughout — but it produces a cosmetically poor "sawtooth" settled phase and would cause unnecessary mechanical wear on a real choke valve.
+During initial testing with a quadratic tracking cost and no dead-band, the controller exhibited **choke chattering**: after reaching the production target, the choke oscillated ±1–2% per step indefinitely rather than holding still. Root cause: once Q is within the noise floor (~±2 bbl/hr), the tracking cost and ramp cost are nearly equal for every candidate, so the controller alternates between adjacent choke positions on successive steps. This is not a safety issue - pressures remained within limits throughout - but it produces a cosmetically poor "sawtooth" settled phase and would cause unnecessary mechanical wear on a real choke valve.
 
 The fix is a **dead-band** on the tracking error: when `|predicted_Q - target_Q| ≤ dead_band` (default 3 bbl/hr, ≈2.3% of a 130 bbl/hr target), the tracking term collapses to zero and the ramp penalty dominates. The cheapest move is always Δu = 0. Chattering stops entirely, and the choke flatlines once on-target. The dead-band does **not** affect constraint logic (hard rejection and soft barrier are evaluated on absolute predicted pressures, not on tracking error), and it has zero effect on Scenario C where the choke is already physically bounded at 100%.
 
 The controller's decision log explicitly records `DEAD-BAND HOLD` entries during held steps, making this decision visible and auditable.
 
 ### Hard Rejection
-Any candidate predicted to violate WHP, FLP, or BHP hard limits is **excluded entirely** from selection — not just penalized. This guarantees the chosen action is always within the safe operating envelope.
+Any candidate predicted to violate WHP, FLP, or BHP hard limits is **excluded entirely** from selection - not just penalized. This guarantees the chosen action is always within the safe operating envelope.
 
 ### Fallback (Scenario C behavior)
-If **all** candidates violate hard limits (infeasible target), the controller holds the current choke position. It does not chase the target further — production safety takes priority.
+If **all** candidates violate hard limits (infeasible target), the controller holds the current choke position. It does not chase the target further - production safety takes priority.
 
 ### Tuned Parameters
 
@@ -158,7 +158,7 @@ If **all** candidates violate hard limits (infeasible target), the controller ho
 
 2. **Linear model**: ARX assumes linear dynamics. If the real simulator shows strong nonlinearity (e.g., production rate vs. choke is highly curved, or time constants vary strongly with operating point), consider fitting separate linear models per operating region (piecewise ARX) without changing the controller architecture.
 
-3. **Mock simulator calibration**: The physics-grounded steady-state model (`Q = Cv(u)·u·sqrt(ΔP)`) is calibrated to all 14 real organizer data points (choke positions 5–95%). Two values — `u=40%` (~101.3 bbl/hr) and `u=100%` (~175.1 bbl/hr) — are physics-model extrapolations with no organizer data backing and are labeled as such in `architecture.md`. Safe operating limits (`LIMITS` dict) are verified against the reference dataset range. Update after receiving the real simulator.
+3. **Mock simulator calibration**: The physics-grounded steady-state model (`Q = Cv(u)·u·sqrt(ΔP)`) is calibrated to all 14 real organizer data points (choke positions 5–95%). Two values - `u=40%` (~101.3 bbl/hr) and `u=100%` (~175.1 bbl/hr) - are physics-model extrapolations with no organizer data backing and are labeled as such in `architecture.md`. Safe operating limits (`LIMITS` dict) are verified against the reference dataset range. Update after receiving the real simulator.
 
 4. **No dead-time modeled**: The ARX model assumes zero dead-time (immediate effect of choke change). If the real simulator shows a pure delay of D steps, add D shifted-choke terms to the feature vector in `model.py`.
 
