@@ -35,10 +35,12 @@ In this section, we initialize all core dependencies, set up the plotting enviro
   - Choke Ramp Rate: -5%/hr <= delta_u <= +5%/hr
 """))
 
-    nb.cells.append(nbf.v4.new_code_cell("""import numpy as np
+    nb.cells.append(nbf.v4.new_code_cell("""%matplotlib inline
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import warnings
+from IPython.display import display
 warnings.filterwarnings('ignore')
 
 # Set plotting style
@@ -104,10 +106,13 @@ axes[4].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.savefig('mock_step_test_plot.png', dpi=300)
-plt.show()
+display(fig)
+plt.close(fig)
 """))
 
-    nb.cells.append(nbf.v4.new_markdown_cell("""### Step-Test Commentary & Insights
+    nb.cells.append(nbf.v4.new_markdown_cell("""### Step-Test Figure & Insights
+![Open-Loop Step Test Plot](mock_step_test_plot.png)
+
 1. **Flow Non-Linearity**: Oil flow rate Q increases non-linearly with choke opening u, showing higher gain dQ/du at small choke openings (< 30%) and diminishing returns as choke approaches 80%.
 2. **Pressure Responses**:
    - **Wellhead Pressure (WHP)**: Decreases as choke opens due to reduced choke pressure drop.
@@ -186,10 +191,13 @@ axes[1, 1].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.savefig('mock_model_validation.png', dpi=300)
-plt.show()
+display(fig)
+plt.close(fig)
 """))
 
-    nb.cells.append(nbf.v4.new_markdown_cell("""### Model Validation Commentary
+    nb.cells.append(nbf.v4.new_markdown_cell("""### Model Validation Figure & Commentary
+![Dynamic Model Fit Validation](mock_model_validation.png)
+
 As demonstrated above, all state variables achieve **R2 > 0.99**, confirming that the dynamic model accurately captures both transient dynamics and steady-state pressure drops. This high model fidelity enables accurate candidate evaluation inside the MPC controller.
 """))
 
@@ -309,7 +317,8 @@ axes[5].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.savefig('mock_final_scenario_A_plot.png', dpi=300)
-plt.show()
+display(fig)
+plt.close(fig)
 
 # Print summary metrics
 settled_Q = df_A['OilRate_bbl_hr'].iloc[-10:].mean()
@@ -320,6 +329,10 @@ print(f"=== Scenario A Summary Metrics ===")
 print(f"  Settled Rate: {settled_Q:.2f} bbl/hr (Target: {target_Q} bbl/hr, Error: {err:.2f}%)")
 print(f"  Max Choke Ramp Rate: {max_ramp:.2f}%/hr (Limit: 5.0%/hr)")
 print(f"  Constraint Violations: 0")
+"""))
+
+    nb.cells.append(nbf.v4.new_markdown_cell("""### Scenario A Figure & Performance
+![Scenario A Trends](mock_final_scenario_A_plot.png)
 """))
 
     # ── 6. Scenario B Results (Target Step-Change) ────────────────────────────
@@ -399,7 +412,8 @@ axes[5].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.savefig('mock_final_scenario_B_plot.png', dpi=300)
-plt.show()
+display(fig)
+plt.close(fig)
 
 p1_q = df_B.loc[df_B["Target_Q"] == 100.0, "OilRate_bbl_hr"].iloc[-5:].mean()
 p2_q = df_B.loc[df_B["Target_Q"] == 150.0, "OilRate_bbl_hr"].iloc[-5:].mean()
@@ -409,6 +423,10 @@ print(f"  Phase 1 Settled Rate: {p1_q:.2f} bbl/hr (Target: 100 bbl/hr)")
 print(f"  Phase 2 Settled Rate: {p2_q:.2f} bbl/hr (Target: 150 bbl/hr)")
 print(f"  Max Choke Ramp Rate: {max_ramp:.2f}%/hr (Limit: 5.0%/hr)")
 print(f"  Constraint Violations: 0")
+"""))
+
+    nb.cells.append(nbf.v4.new_markdown_cell("""### Scenario B Figure & Performance
+![Scenario B Trends](mock_final_scenario_B_plot.png)
 """))
 
     # ── 7. Scenario C Results (Infeasible Target) ────────────────────────────
@@ -489,7 +507,8 @@ axes[5].grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.savefig('mock_final_scenario_C_plot.png', dpi=300)
-plt.show()
+display(fig)
+plt.close(fig)
 
 final_q = df_C['OilRate_bbl_hr'].iloc[-10:].mean()
 final_choke = df_C['Choke_pct'].iloc[-1]
@@ -499,6 +518,10 @@ print(f"  Target Rate: 300 bbl/hr (Infeasible Target)")
 print(f"  Safely Clamped Rate: {final_q:.2f} bbl/hr at Choke {final_choke:.1f}%")
 print(f"  Max Choke Ramp Rate: {max_ramp:.2f}%/hr (Limit: 5.0%/hr)")
 print(f"  Constraint Violations: 0 (Holding safely within pressure envelope)")
+"""))
+
+    nb.cells.append(nbf.v4.new_markdown_cell("""### Scenario C Figure & Active Guarding
+![Scenario C Trends](mock_final_scenario_C_plot.png)
 """))
 
     # ── 8. Stress-Test Summary ────────────────────────────────────────────────
