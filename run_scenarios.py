@@ -127,7 +127,7 @@ def run_all_scenarios():
         w_ramp=0.3,
         barrier_k=500.0,
         barrier_eps=2.0,
-        hard_margin=0.0,
+        hard_margin=3.0,
         delta_u_step=1.0,
         max_ramp_rate=5.0,
     )
