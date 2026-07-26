@@ -621,7 +621,10 @@ with tab1:
 with tab2:
     st.markdown("<div class='section-subheader'>Process Trends</div>", unsafe_allow_html=True)
     fig = make_trend_figure(df, cfg["target_change_step"])
-    st.plotly_chart(fig, use_container_width=True)
+    try:
+        st.plotly_chart(fig, width="stretch")
+    except TypeError:
+        st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("<div style='margin-bottom: 24px;'></div>", unsafe_allow_html=True)
 
@@ -640,11 +643,18 @@ with tab2:
             mask = log_display.apply(lambda row: row.astype(str).str.contains(search, case=False).any(), axis=1)
             log_display = log_display[mask]
 
-        st.dataframe(
-            log_display,
-            use_container_width=True,
-            height=320,
-        )
+        try:
+            st.dataframe(
+                log_display,
+                width="stretch",
+                height=320,
+            )
+        except TypeError:
+            st.dataframe(
+                log_display,
+                use_container_width=True,
+                height=320,
+            )
         st.caption(f"{len(log_display)} rows shown")
 
 st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
