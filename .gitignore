@@ -56,6 +56,7 @@ real_*.json
 *.zip
 *.html
 convert_presentation_pdf.py
+convert_docs_pdf.py
 
 # ── Tracked custom Streamlit components ────────────────────────────────────────
 !well_schematic_component/
