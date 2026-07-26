@@ -69,10 +69,10 @@ Only **three steps** are needed:
 **ARX (Autoregressive with eXogenous input) linear regression** is used for one-step-ahead prediction inside the controller.
 
 Features per step:
-- `y[k-1]` — previous value of the output variable (autoregressive term)
-- `u[k]` — current choke position
-- `u[k-1]` — previous choke position
-- `Δu[k]` — choke move magnitude
+- `y[k-1]` : previous value of the output variable (autoregressive term)
+- `u[k]` : current choke position
+- `u[k-1]` : previous choke position
+- `Δu[k]` : choke move magnitude
 
 **Why ARX over a neural network or more complex model?**
 
