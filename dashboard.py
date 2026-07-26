@@ -1,5 +1,5 @@
 """
-dashboard.py — Streamlit dashboard for scenario visualization
+dashboard.py - Streamlit dashboard for scenario visualization
 -------------------------------------------------------------
 Run with:
     streamlit run dashboard.py
@@ -10,7 +10,7 @@ Features:
   - Scenario Trends Tab: 6 required trend plots per scenario (interactive, via plotly) + searchable rationale log
   - Key metrics summary panel & constraint violation indicator
 
-[MOCK DATA — REHEARSAL ONLY until real simulator is swapped in]
+[MOCK DATA - REHEARSAL ONLY until real simulator is swapped in]
 """
 
 import streamlit as st
@@ -22,8 +22,8 @@ import os
 
 # ── Page config ─────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Autonomous Choke Controller — Dashboard",
-    page_icon="🛢️",
+    page_title="Autonomous Choke Controller - Dashboard",
+    page_icon="chart",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -46,22 +46,22 @@ except ImportError:
 
 # ── Data files ───────────────────────────────────────────────────────────────────
 SCENARIOS = {
-    "A — Startup to Target": {
+    "A - Startup to Target": {
         "trend": "mock_scenario_A.csv",
         "log":   "mock_scenario_A_rationale.csv",
-        "desc":  "Well starts near shut-in (choke ≈ 5%). Controller autonomously ramps "
+        "desc":  "Well starts near shut-in (choke ~ 5%). Controller autonomously ramps "
                  "choke to achieve the production target of 130 bbl/hr while respecting "
-                 "all pressure constraints and the ±5%/hr choke ramp-rate limit.",
+                 "all pressure constraints and the +/-5%/hr choke ramp-rate limit.",
         "target_change_step": None,
     },
-    "B — Target Step-Change": {
+    "B - Target Step-Change": {
         "trend": "mock_scenario_B.csv",
         "log":   "mock_scenario_B_rationale.csv",
         "desc":  "Controller tracks 100 bbl/hr for 30 hours, then the target changes to "
                  "150 bbl/hr. Controller re-tracks the new target without violating constraints.",
         "target_change_step": 30,
     },
-    "C — Infeasible Target": {
+    "C - Infeasible Target": {
         "trend": "mock_scenario_C.csv",
         "log":   "mock_scenario_C_rationale.csv",
         "desc":  "Requested target of 300 bbl/hr exceeds the safe operating envelope. "
@@ -84,6 +84,145 @@ BG = "#0f1117"
 PANEL_BG = "#1a1d27"
 GRID_COL = "#2a2d3a"
 
+# ── Custom CSS for visual polish & card layout ──────────────────────────────────
+st.markdown("""
+<style>
+    /* Dark Theme Core */
+    .stApp {
+        background-color: #0f1117;
+        color: #f1f5f9;
+    }
+    
+    /* Global Typography */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.02em;
+    }
+    
+    /* Metric Cards Styling */
+    [data-testid="stMetric"] {
+        background-color: #1a1d27;
+        border: 1px solid #2a2d3a;
+        border-radius: 8px;
+        padding: 14px 18px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #94a3b8 !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    
+    [data-testid="stMetricValue"] {
+        color: #f8fafc !important;
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Sidebar Polish */
+    section[data-testid="stSidebar"] {
+        background-color: #12151e;
+        border-right: 1px solid #2a2d3a;
+    }
+    
+    .sidebar-section-header {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.08em;
+        margin-top: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Status Banner */
+    .status-banner-rehearsal {
+        background-color: rgba(96, 165, 250, 0.08);
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        border-radius: 6px;
+        padding: 10px 14px;
+        color: #93c5fd;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin-top: 1rem;
+    }
+
+    /* Styled Constraint Table in Sidebar */
+    .sidebar-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+        margin-top: 4px;
+    }
+    .sidebar-table th {
+        text-align: left;
+        color: #64748b;
+        border-bottom: 1px solid #2a2d3a;
+        padding: 6px 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+    }
+    .sidebar-table td {
+        padding: 6px 8px;
+        color: #cbd5e1;
+        border-bottom: 1px solid rgba(42, 45, 58, 0.5);
+    }
+    .sidebar-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Component Info Card Styling */
+    .info-card {
+        background-color: #1a1d27;
+        border: 1px solid #2a2d3a;
+        border-radius: 8px;
+        padding: 18px 22px;
+        margin-bottom: 16px;
+    }
+    .info-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .accent-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .info-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f8fafc;
+        margin: 0;
+    }
+    .info-card-subtitle {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-left: auto;
+    }
+
+    /* Section Subheaders */
+    .section-subheader {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f8fafc;
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────────
 
@@ -100,9 +239,9 @@ def make_trend_figure(df: pd.DataFrame, target_change_step=None) -> go.Figure:
     rows = 5
     subplot_titles = [
         "Oil Rate vs Target (bbl/hr)",
-        "Wellhead Pressure — WHP (psi)",
-        "Flowline Pressure — FLP (psi)",
-        "Bottom Hole Pressure — BHP (psi)",
+        "Wellhead Pressure - WHP (psi)",
+        "Flowline Pressure - FLP (psi)",
+        "Bottom Hole Pressure - BHP (psi)",
         "Choke Position (%)",
     ]
     fig = make_subplots(
@@ -178,30 +317,39 @@ def make_trend_figure(df: pd.DataFrame, target_change_step=None) -> go.Figure:
 # ── Sidebar ──────────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.markdown("## 🛢️ Choke Controller")
-    st.markdown("**Autonomous Production Choke Controller**")
+    st.markdown("<h2 style='margin-bottom:2px;'>Choke Controller</h2>", unsafe_allow_html=True)
+    st.markdown("<div style='color:#94a3b8; font-size:0.85rem; font-weight:500; margin-bottom:12px;'>Autonomous Production Control</div>", unsafe_allow_html=True)
     st.caption("Predictive, constraint-aware control for a naturally flowing oil well")
-    st.divider()
-
+    
+    st.markdown("<div class='sidebar-section-header'>Configuration</div>", unsafe_allow_html=True)
     scenario_label = st.radio(
         "Select Scenario",
         list(SCENARIOS.keys()),
         index=0,
     )
-    st.divider()
-
-    st.markdown("**Constraint Limits**")
+    
+    st.markdown("<div class='sidebar-section-header'>Operating Limits</div>", unsafe_allow_html=True)
     st.markdown(f"""
-| Variable | Min | Max |
-|---|---|---|
-| WHP | {LIMITS['WHP_min']:.0f} psi | {LIMITS['WHP_max']:.0f} psi |
-| FLP | {LIMITS['FLP_min']:.0f} psi | {LIMITS['FLP_max']:.0f} psi |
-| BHP | {LIMITS['BHP_min']:.0f} psi | {LIMITS['BHP_max']:.0f} psi |
-| Choke | 0% | 100% |
-| Ramp | — | ±5%/hr |
-""")
-    st.divider()
-    st.caption("⚠️ MOCK DATA — REHEARSAL ONLY\nSwap simulator import before final run.")
+    <table class="sidebar-table">
+        <thead>
+            <tr><th>Variable</th><th>Min</th><th>Max</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>WHP</td><td>{LIMITS['WHP_min']:.0f} psi</td><td>{LIMITS['WHP_max']:.0f} psi</td></tr>
+            <tr><td>FLP</td><td>{LIMITS['FLP_min']:.0f} psi</td><td>{LIMITS['FLP_max']:.0f} psi</td></tr>
+            <tr><td>BHP</td><td>{LIMITS['BHP_min']:.0f} psi</td><td>{LIMITS['BHP_max']:.0f} psi</td></tr>
+            <tr><td>Choke</td><td>0%</td><td>100%</td></tr>
+            <tr><td>Ramp</td><td>-</td><td>&plusmn;5%/hr</td></tr>
+        </tbody>
+    </table>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="status-banner-rehearsal">
+        <strong>REHEARSAL CONFIGURATION</strong><br/>
+        Mock simulator data active. Swap simulator import prior to final submission.
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────────
@@ -209,14 +357,14 @@ with st.sidebar:
 cfg  = SCENARIOS[scenario_label]
 
 st.markdown(
-    f"<h2 style='color:white;margin-bottom:0'>{scenario_label}</h2>",
+    f"<h2 style='color:#f8fafc; margin-bottom:4px; font-weight:700;'>{scenario_label}</h2>",
     unsafe_allow_html=True,
 )
 st.caption(cfg["desc"])
 
 # Check files exist (automatic self-healing for cloud deployment)
 if not os.path.exists(cfg["trend"]) or not os.path.exists(cfg["log"]):
-    with st.spinner("⏳ Generating scenario simulation data for cloud setup..."):
+    with st.spinner("Generating scenario simulation data for cloud setup..."):
         import subprocess
         subprocess.run(["python", "run_scenarios.py"], check=True)
 
@@ -234,7 +382,7 @@ max_ramp   = df["Choke_pct"].diff().abs().max()
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric("Constraint Violations", viols["total"],
-              delta="✅ Safe" if viols["total"] == 0 else f"⚠️ {viols['total']} violations",
+              delta="Safe" if viols["total"] == 0 else f"{viols['total']} violations",
               delta_color="normal" if viols["total"] == 0 else "inverse")
 with col2:
     st.metric("Settled Oil Rate", f"{final_Q:.1f} bbl/hr")
@@ -244,18 +392,18 @@ with col4:
     st.metric("Settling Error", f"{settle_err:.1f} bbl/hr")
 with col5:
     st.metric("Max Choke Ramp", f"{max_ramp:.1f}%/hr",
-              delta="✅ ≤5%" if max_ramp <= 5.0 else f"⚠️ Exceeds 5%",
+              delta="<=5%" if max_ramp <= 5.0 else f"Exceeds 5%",
               delta_color="normal" if max_ramp <= 5.0 else "inverse")
 
-st.divider()
+st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 
 # ── Tabs ─────────────────────────────────────────────────────────────────────────
 
-tab1, tab2 = st.tabs(["🛢️ System Overview & Schematic", "📈 Scenario Trends & Logs"])
+tab1, tab2 = st.tabs(["System Overview & Schematic", "Scenario Trends & Logs"])
 
 # ── TAB 1: System Overview & Schematic ───────────────────────────────────────────
 with tab1:
-    st.markdown("### 🛢️ Naturally Flowing Oil Well — Production Schematic")
+    st.markdown("<div class='section-subheader'>Naturally Flowing Oil Well - Production Schematic</div>", unsafe_allow_html=True)
     st.caption("Interactive schematic of the production loop (Control interval $T_s = 1\\text{ hr}$). "
                "Click any highlighted component below or use the selector pills to inspect its live status in the active scenario.")
 
@@ -268,11 +416,11 @@ with tab1:
         st.session_state["last_svg_val"] = "Choke"
 
     id_to_label = {
-        "Choke": "🎛️ Choke Valve (u)",
-        "WHP":   "🔵 Wellhead Pressure (WHP)",
-        "FLP":   "🟠 Flowline Pressure (FLP)",
-        "BHP":   "🔴 Bottom Hole Pressure (BHP)",
-        "AP":    "🟣 Annulus Pressure (AP)"
+        "Choke": "Choke Valve (u)",
+        "WHP":   "Wellhead Pressure (WHP)",
+        "FLP":   "Flowline Pressure (FLP)",
+        "BHP":   "Bottom Hole Pressure (BHP)",
+        "AP":    "Annulus Pressure (AP)"
     }
     label_to_id = {v: k for k, v in id_to_label.items()}
 
@@ -303,71 +451,100 @@ with tab1:
             st.session_state["last_radio_val"] = clicked_svg
             st.rerun()
     else:
-        st.warning("⚠️ Custom schematic component could not be loaded. Use the selector buttons above.")
+        st.warning("Custom schematic component could not be loaded. Use the selector buttons above.")
 
-    st.divider()
+    st.markdown("<div style='margin-bottom: 16px;'></div>", unsafe_allow_html=True)
 
     # ── Live Info Cards for Selected Node ────────────────────────────────────────
     curr_id = st.session_state["active_node"]
 
     if curr_id == "Choke":
-        st.markdown("#### 🎛️ Production Choke Valve ($u$) — Manipulated Variable")
-        st.markdown(
-            "The production choke valve is the primary manipulated variable in this challenge. "
-            "Opening the choke increases fluid production rate ($Q$) but lowers well pressures. "
-            "To prevent mechanical wear and hydraulic shock, movements are bounded by strict rate limits."
-        )
+        st.markdown(f"""
+        <div class="info-card" style="border-left: 4px solid {COLORS['Choke_pct']};">
+            <div class="info-card-header">
+                <span class="accent-indicator" style="background-color: {COLORS['Choke_pct']};"></span>
+                <span class="info-card-title">Production Choke Valve (u)</span>
+                <span class="info-card-subtitle">Manipulated Variable</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                The production choke valve is the primary manipulated variable in this challenge.
+                Opening the choke increases fluid production rate (Q) but lowers well pressures.
+                To prevent mechanical wear and hydraulic shock, movements are bounded by strict rate limits.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         c1, c2, c3 = st.columns(3)
         with c1:
             st.metric("Current Choke Opening", f"{df['Choke_pct'].iloc[-1]:.1f}%")
         with c2:
             st.metric("Allowable Ramp Rate", "±5.0%/hr", "Enforced every step")
         with c3:
-            st.metric("Max Ramp Experienced", f"{df['Choke_pct'].diff().abs().max():.1f}%/hr", "✅ Compliant")
+            st.metric("Max Ramp Experienced", f"{df['Choke_pct'].diff().abs().max():.1f}%/hr", "Compliant")
         
         if not log.empty:
             last_reason = log["reason"].iloc[-1]
             st.info(f"**Latest Controller Rationale (Step {int(log['step'].iloc[-1])}):** {last_reason}")
 
     elif curr_id == "WHP":
-        st.markdown("#### 🔵 Wellhead Pressure (WHP) — Active Safety Constraint")
-        st.markdown(
-            "Pressure measured at the wellhead Christmas tree. If WHP drops too low, the well operates outside its "
-            "recommended operating envelope, causing flow instability or surface equipment issues. "
-            "In this challenge, WHP is an **active safety constraint**."
-        )
         curr_val = df["WHP_psi"].iloc[-1]
         min_val  = df["WHP_psi"].min()
         headroom = min_val - LIMITS["WHP_min"]
+        
+        st.markdown(f"""
+        <div class="info-card" style="border-left: 4px solid {COLORS['WHP_psi']};">
+            <div class="info-card-header">
+                <span class="accent-indicator" style="background-color: {COLORS['WHP_psi']};"></span>
+                <span class="info-card-title">Wellhead Pressure (WHP)</span>
+                <span class="info-card-subtitle">Active Safety Constraint</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                Pressure measured at the wellhead Christmas tree. If WHP drops too low, the well operates outside its
+                recommended operating envelope, causing flow instability or surface equipment issues.
+                In this challenge, WHP is an <strong>active safety constraint</strong>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         c1, c2, c3 = st.columns(3)
         with c1:
             st.metric("Current WHP", f"{curr_val:.1f} psi")
         with c2:
             st.metric("Safe Limit Floor", f"{LIMITS['WHP_min']:.0f} psi", f"Max {LIMITS['WHP_max']:.0f} psi")
         with c3:
-            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
+            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "Above floor" if headroom >= 0 else "Breached")
         st.success(
             f"**Controller Protection**: Across all {len(df)} steps in {scenario_label}, WHP never dropped below "
             f"{min_val:.1f} psi (a safe buffer of {headroom:.1f} psi above the hard limit)."
         )
 
     elif curr_id == "FLP":
-        st.markdown("#### 🟠 Flowline Pressure (FLP) — Active Safety Constraint")
-        st.markdown(
-            "Pressure measured downstream of the choke in the surface flowline transporting fluids to the gathering manifold. "
-            "Maintaining adequate FLP ensures stable multiphase flow and prevents separator flooding. "
-            "In this challenge, FLP is an **active safety constraint**."
-        )
         curr_val = df["FLP_psi"].iloc[-1]
         min_val  = df["FLP_psi"].min()
         headroom = min_val - LIMITS["FLP_min"]
+
+        st.markdown(f"""
+        <div class="info-card" style="border-left: 4px solid {COLORS['FLP_psi']};">
+            <div class="info-card-header">
+                <span class="accent-indicator" style="background-color: {COLORS['FLP_psi']};"></span>
+                <span class="info-card-title">Flowline Pressure (FLP)</span>
+                <span class="info-card-subtitle">Active Safety Constraint</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                Pressure measured downstream of the choke in the surface flowline transporting fluids to the gathering manifold.
+                Maintaining adequate FLP ensures stable multiphase flow and prevents separator flooding.
+                In this challenge, FLP is an <strong>active safety constraint</strong>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         c1, c2, c3 = st.columns(3)
         with c1:
             st.metric("Current FLP", f"{curr_val:.1f} psi")
         with c2:
             st.metric("Safe Limit Floor", f"{LIMITS['FLP_min']:.0f} psi", f"Max {LIMITS['FLP_max']:.0f} psi")
         with c3:
-            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
+            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "Above floor" if headroom >= 0 else "Breached")
         st.success(
             f"**Scenario Performance**: In {scenario_label}, Flowline Pressure reached a minimum of {min_val:.1f} psi. "
             f"When target tracking would cause FLP to breach {LIMITS['FLP_min']:.0f} psi, the controller's hard rejection "
@@ -375,23 +552,33 @@ with tab1:
         )
 
     elif curr_id == "BHP":
-        st.markdown("#### 🔴 Bottom Hole Pressure (BHP) — Active Safety Constraint")
-        st.markdown(
-            "Pressure measured at the reservoir/wellbore interface at the bottom of the production tubing. "
-            "BHP is the primary indicator of reservoir drawdown. If BHP drops below the safe floor, it risks "
-            "formation sand collapse, gas coning, and permanent reservoir damage. "
-            "In this challenge, BHP is an **active safety constraint**."
-        )
         curr_val = df["BHP_psi"].iloc[-1]
         min_val  = df["BHP_psi"].min()
         headroom = min_val - LIMITS["BHP_min"]
+
+        st.markdown(f"""
+        <div class="info-card" style="border-left: 4px solid {COLORS['BHP_psi']};">
+            <div class="info-card-header">
+                <span class="accent-indicator" style="background-color: {COLORS['BHP_psi']};"></span>
+                <span class="info-card-title">Bottom Hole Pressure (BHP)</span>
+                <span class="info-card-subtitle">Active Safety Constraint</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                Pressure measured at the reservoir/wellbore interface at the bottom of the production tubing.
+                BHP is the primary indicator of reservoir drawdown. If BHP drops below the safe floor, it risks
+                formation sand collapse, gas coning, and permanent reservoir damage.
+                In this challenge, BHP is an <strong>active safety constraint</strong>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
         c1, c2, c3 = st.columns(3)
         with c1:
             st.metric("Current BHP", f"{curr_val:.1f} psi")
         with c2:
             st.metric("Safe Limit Floor", f"{LIMITS['BHP_min']:.0f} psi", f"Max {LIMITS['BHP_max']:.0f} psi")
         with c3:
-            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "✅ Above floor" if headroom >= 0 else "⚠️ Breached")
+            st.metric("Minimum Run Headroom", f"{headroom:+.1f} psi", "Above floor" if headroom >= 0 else "Breached")
         st.success(
             f"**Reservoir Health Preservation**: In {scenario_label}, minimum BHP observed in this run was {min_val:.1f} psi "
             f"({headroom:+.1f} psi above the {LIMITS['BHP_min']:.0f} psi limit). "
@@ -399,12 +586,21 @@ with tab1:
         )
 
     elif curr_id == "AP":
-        st.markdown("#### 🟣 Annulus Pressure (AP) — Informational / Supervisory Interlock")
-        st.markdown(
-            "Pressure measured in the sealed annular space between the surface casing and production tubing. "
-            "While annulus pressure is continuously monitored in oilfield operations to verify tubing integrity, "
-            "**it is NOT an active constraint in this challenge**, per the problem statement's stated scope."
-        )
+        st.markdown("""
+        <div class="info-card" style="border-left: 4px solid #a78bfa;">
+            <div class="info-card-header">
+                <span class="accent-indicator" style="background-color: #a78bfa;"></span>
+                <span class="info-card-title">Annulus Pressure (AP)</span>
+                <span class="info-card-subtitle">Informational / Supervisory Interlock</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px;">
+                Pressure measured in the sealed annular space between the surface casing and production tubing.
+                While annulus pressure is continuously monitored in oilfield operations to verify tubing integrity,
+                <strong>it is NOT an active constraint in this challenge</strong>, per the problem statement's stated scope.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
         c1, c2 = st.columns(2)
         with c1:
             st.info(
@@ -423,20 +619,22 @@ with tab1:
 
 # ── TAB 2: Scenario Trends & Logs ────────────────────────────────────────────────
 with tab2:
-    st.markdown("### Process Trends")
+    st.markdown("<div class='section-subheader'>Process Trends</div>", unsafe_allow_html=True)
     fig = make_trend_figure(df, cfg["target_change_step"])
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("<div style='margin-bottom: 24px;'></div>", unsafe_allow_html=True)
+
     # ── Decision rationale log ────────────────────────────────────────────────────
     if not log.empty:
-        st.markdown("### Controller Decision Log")
+        st.markdown("<div class='section-subheader'>Controller Decision Log</div>", unsafe_allow_html=True)
 
         disp_cols = ["step", "time_hr", "choke_prev", "choke_chosen", "delta_u",
                      "target_Q", "predicted_Q", "measured_Q",
                      "n_candidates_evaluated", "n_candidates_rejected_hard", "reason"]
         disp_cols = [c for c in disp_cols if c in log.columns]
 
-        search = st.text_input("🔍 Filter rationale log", placeholder="e.g. 'FALLBACK' or 'BHP'")
+        search = st.text_input("Filter rationale log", placeholder="e.g. 'FALLBACK' or 'BHP'")
         log_display = log[disp_cols]
         if search:
             mask = log_display.apply(lambda row: row.astype(str).str.contains(search, case=False).any(), axis=1)
@@ -449,9 +647,9 @@ with tab2:
         )
         st.caption(f"{len(log_display)} rows shown")
 
-st.divider()
+st.markdown("<div style='margin-bottom: 20px;'></div>", unsafe_allow_html=True)
 st.caption(
-    "Built for Honeywell Hackathon — Autonomous Production Choke Controller  |  "
-    "[MOCK DATA — REHEARSAL ONLY]  |  "
-    "Swap mock_simulator import → real simulator before final demo."
+    "Built for Honeywell Hackathon - Autonomous Production Choke Controller  |  "
+    "[MOCK DATA - REHEARSAL ONLY]  |  "
+    "Swap mock_simulator import -> real simulator before final demo."
 )
