@@ -47,6 +47,8 @@
   - Set to $\text{dead\_band} = 3.0\text{ bbl/hr}$ ($w_{track}=1.0, w_{ramp}=0.3$).
   - Inside the dead-band, tracking cost collapses to 0, allowing $w_{ramp}$ to dominate and forcing $\Delta u = 0$. This completely eliminated steady-state choke hunting/chattering.
 
+![Dead-Band Chatter Comparison](deadband_chatter_comparison.png)
+
 ### 2.3 Constraint Handling Approach
 - **Dual-Layer Defense**:
   1. **Hard Rejection**: Any candidate predicted to violate pressure boundaries ($WHP \in [200, 480]\text{ psi}$, $FLP \in [150, 350]\text{ psi}$, $BHP \in [2200, 3000]\text{ psi}$ — *rehearsal working limits derived from dataset range, centralized in `LIMITS` config*) adjusted by `hard_margin = 3.0 psi` (effective floor: $FLP \ge 153\text{ psi}$, $BHP \ge 2203\text{ psi}$) is discarded.
