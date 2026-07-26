@@ -75,5 +75,5 @@ jupyter nbconvert --execute --to notebook --inplace choke_controller_final_submi
 ---
 
 ### Verification
-- Check that $R^2 > 0.99$ in `model.py` fit summary.
+- Check that R² > 0.99 in `model.py` fit summary.
 - Verify 0 constraint violations in `stress_test_all_variants.py`.

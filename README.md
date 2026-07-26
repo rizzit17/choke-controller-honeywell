@@ -110,7 +110,7 @@ If **all** candidates violate hard limits (infeasible target), the controller ho
 | Variable | Minimum | Maximum | Classification |
 |---|---|---|---|
 | **Choke Opening** | 0% | 100% | **Organizer-Specified** (`.docx`) |
-| **Choke Ramp Rate** | −5%/hr | +5%/hr | **Organizer-Specified** (`.docx`, $T_s=1\text{ hr}$) |
+| **Choke Ramp Rate** | −5%/hr | +5%/hr | **Organizer-Specified** (`.docx`, Ts = 1 hr) |
 | **WHP (Wellhead Pressure)** | 200 psi | 480 psi | **Working Assumption** (derived from dataset range) |
 | **FLP (Flowline Pressure)** | 150 psi | 350 psi | **Working Assumption** (derived from dataset range) |
 | **BHP (Bottom Hole Pressure)** | 2200 psi | 3000 psi | **Working Assumption** (derived from dataset range) |

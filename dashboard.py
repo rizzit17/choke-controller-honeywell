@@ -404,7 +404,7 @@ tab1, tab2 = st.tabs(["System Overview & Schematic", "Scenario Trends & Logs"])
 # ── TAB 1: System Overview & Schematic ───────────────────────────────────────────
 with tab1:
     st.markdown("<div class='section-subheader'>Naturally Flowing Oil Well - Production Schematic</div>", unsafe_allow_html=True)
-    st.caption("Interactive schematic of the production loop (Control interval $T_s = 1\\text{ hr}$). "
+    st.caption("Interactive schematic of the production loop (Control interval Ts = 1 hr). "
                "Click any highlighted component below or use the selector pills to inspect its live status in the active scenario.")
 
     # State tracking for bidirectional selector
