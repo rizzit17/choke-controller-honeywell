@@ -40,7 +40,8 @@ streamlit run dashboard.py
 | `plot_scenarios.py` | Interim scenario plots (per-iteration) |
 | `plot_final.py` | **Final** 6-panel plots per scenario, saved as `mock_final_scenario_*.png` |
 | `dashboard.py` | Streamlit dashboard with interactive Plotly charts + decision log |
-| `test_constraints_and_compare.py` | Constraint validation suite — 20 tests, run after every parameter change |
+| `test_constraints_and_compare.py` | Constraint validation suite — 20 tests (baseline), run after every parameter change |
+| `stress_test_all_variants.py` | 57-check robustness suite — 3 scenarios × 3 simulator variants (baseline/pessimistic/optimistic) |
 
 **All output files prefixed `mock_` are rehearsal data only. Final deliverables use real simulator output.**
 
@@ -154,7 +155,7 @@ If **all** candidates violate hard limits (infeasible target), the controller ho
 
 2. **Linear model**: ARX assumes linear dynamics. If the real simulator shows strong nonlinearity (e.g., production rate vs. choke is highly curved, or time constants vary strongly with operating point), consider fitting separate linear models per operating region (piecewise ARX) without changing the controller architecture.
 
-3. **Mock simulator calibration**: Limits and steady-state values in `mock_simulator.py` are approximations from the reference dataset. Actual safe limits from the real simulator may differ — update `LIMITS` in `controller.py` accordingly.
+3. **Mock simulator calibration**: The physics-grounded steady-state model (`Q = Cv(u)·u·sqrt(ΔP)`) is calibrated to all 14 real organizer data points (choke positions 5–95%). Two values — `u=40%` (~101.3 bbl/hr) and `u=100%` (~175.1 bbl/hr) — are physics-model extrapolations with no organizer data backing and are labeled as such in `architecture.md`. Safe operating limits (`LIMITS` dict) are verified against the reference dataset range. Update after receiving the real simulator.
 
 4. **No dead-time modeled**: The ARX model assumes zero dead-time (immediate effect of choke change). If the real simulator shows a pure delay of D steps, add D shifted-choke terms to the feature vector in `model.py`.
 
