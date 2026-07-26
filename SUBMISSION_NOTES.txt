@@ -34,10 +34,13 @@ The submission contains:
       * mock_final_scenario_C_plot.png
       * choke_controller_architecture.png
 
-2. LIVE DASHBOARD DEPLOYMENT
+2. LIVE DASHBOARD & GITHUB REPOSITORY DEPLOYMENT
 --------------------------------------------------------------------------------
 Streamlit Cloud Live App URL:
 https://choke-controller-honeywell-rish.streamlit.app/
+
+GitHub Source Code Repository:
+https://github.com/rizzit17/choke-controller-honeywell
 
 3. KEY TECHNICAL HIGHLIGHTS
 --------------------------------------------------------------------------------
