@@ -33,6 +33,8 @@
 
 ## 2. Control Strategy
 
+![Methodology Flowchart](methodology_flowchart.png)
+
 ### 2.1 Prediction Methodology
 - **Brute-Force Candidate Enumeration**: At control step $k$ ($T_s=1\text{ hr}$), evaluate all candidate choke positions $u_{cand} \in [u_k - 5\%, u_k + 5\%]$ in $1\%$ increments (respecting $0\% \le u \le 100\%$).
 - **One-Step-Ahead ARX Rollout**: Predict $[Q_{pred}, WHP_{pred}, FLP_{pred}, BHP_{pred}]$ for each candidate using the trained `ProcessModel`.
