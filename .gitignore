@@ -51,6 +51,12 @@ real_*.csv
 real_*.png
 real_*.json
 
+# ── Large binary exports & generated HTML ─────────────────────────────────────
+*.pdf
+*.zip
+*.html
+convert_presentation_pdf.py
+
 # ── Tracked custom Streamlit components ────────────────────────────────────────
 !well_schematic_component/
 !well_schematic_component/*

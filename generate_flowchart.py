@@ -165,7 +165,7 @@ def build_flowchart():
 
     # Main Title & Subtitle at top
     plt.suptitle(
-        "AUTONOMOUS CHOKE CONTROLLER — 5-STEP CONTROL METHODOLOGY",
+        "AUTONOMOUS CHOKE CONTROLLER - 5-STEP CONTROL METHODOLOGY",
         color=TEXT_COLOR,
         fontsize=13,
         fontweight="bold",

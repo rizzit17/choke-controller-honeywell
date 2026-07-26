@@ -88,7 +88,7 @@ def generate_dark_chart():
     ax2.set_ylim(61.5, 68.5)
     ax2.legend(fontsize=8.5, facecolor=panel_bg, edgecolor=spine_color, labelcolor=text_color, loc="upper right")
 
-    plt.suptitle("DEAD-BAND CHATTER ELIMINATION — BEFORE VS AFTER COMPARISON",
+    plt.suptitle("DEAD-BAND CHATTER ELIMINATION - BEFORE VS AFTER COMPARISON",
                  color=text_color, fontsize=13, fontweight="bold", y=0.98)
 
     plt.tight_layout()
@@ -172,7 +172,7 @@ def generate_white_chart():
     ax2.set_ylim(61.5, 68.5)
     ax2.legend(fontsize=8.5, facecolor="#f8fafc", edgecolor=spine_color, labelcolor=text_color, loc="upper right")
 
-    plt.suptitle("DEAD-BAND CHATTER ELIMINATION — BEFORE VS AFTER COMPARISON",
+    plt.suptitle("DEAD-BAND CHATTER ELIMINATION - BEFORE VS AFTER COMPARISON",
                  color=text_color, fontsize=13, fontweight="bold", y=0.98)
 
     plt.tight_layout()

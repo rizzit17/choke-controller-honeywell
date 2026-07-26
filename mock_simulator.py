@@ -1,5 +1,5 @@
 """
-mock_simulator.py — REHEARSAL ONLY (mock data, not real simulator)
+mock_simulator.py - REHEARSAL ONLY (mock data, not real simulator)
 --------------------------------------------------------------------
 Mimics a naturally flowing oil well with a production choke.
 Interface is identical to the real simulator that will be provided:
@@ -13,7 +13,7 @@ to:
 ...and NOTHING else should need to change.
 
 =========================================================================
-PHYSICS-GROUNDED STEADY-STATE MODEL (v2 — corrected calibration)
+PHYSICS-GROUNDED STEADY-STATE MODEL (v2 - corrected calibration)
 =========================================================================
 The steady-state flow equation follows a standard choke performance
 relationship:
@@ -45,11 +45,11 @@ CALIBRATION BASIS (all 14 real organizer CSV anchor points):
 
 EXTRAPOLATION NOTE (not organizer data):
   u=  0% -> Q=  0 bbl/hr      (physics assumption: zero flow at zero opening)
-  u= 40% -> Q~101.3 bbl/hr    (physics model extrapolation — NOT organizer data)
-  u=100% -> Q~175.1 bbl/hr    (physics model extrapolation — NOT organizer data)
+  u= 40% -> Q~101.3 bbl/hr    (physics model extrapolation - NOT organizer data)
+  u=100% -> Q~175.1 bbl/hr    (physics model extrapolation - NOT organizer data)
 
 Transient dynamics (first-order lag + Gaussian noise) are engineering
-assumptions layered on top of the steady-state model — they are NOT
+assumptions layered on top of the steady-state model - they are NOT
 derived from the organizer data.
 
 Variant     | Pressure slope  | Noise level
@@ -116,7 +116,7 @@ _P_CV_COEF = np.polyfit(_U_CAL, _CV_CAL, 4)  # degree-4 polynomial for Cv(u)
 
 
 def _ss_Cv(u: float) -> float:
-    """Discharge coefficient Cv(u) — fitted to all 14 organizer data points."""
+    """Discharge coefficient Cv(u) - fitted to all 14 organizer data points."""
     return float(np.polyval(_P_CV_COEF, u))
 
 
@@ -171,7 +171,7 @@ _VARIANT_CFG = {
 _NOISE_BASE = {"Q": 0.8, "WHP": 1.2, "FLP": 0.9, "BHP": 3.5}
 
 
-# ── Safe operating limits (active constraints — used by controller, NOT mock) ─
+# ── Safe operating limits (active constraints - used by controller, NOT mock) ─
 # Defined here as class attributes so the controller can import them.
 LIMITS = {
     "WHP_min": 200.0,   # psi
@@ -281,10 +281,10 @@ class WellSimulator:
 
         Returns
         -------
-        Q : float   — Oil flow rate (bbl/hr)
-        WHP : float — Wellhead pressure (psi)
-        FLP : float — Flowline pressure (psi)
-        BHP : float — Bottom hole pressure (psi)
+        Q : float   - Oil flow rate (bbl/hr)
+        WHP : float - Wellhead pressure (psi)
+        FLP : float - Flowline pressure (psi)
+        BHP : float - Bottom hole pressure (psi)
         """
         u = float(np.clip(choke_position, 0.0, 100.0))
         self._choke = u
@@ -356,7 +356,7 @@ if __name__ == "__main__":
     passed = verify_calibration(tol=1.0)
 
     # Smoke test across variants
-    print("\nSmoke test — 5 steps at choke=50%, all variants:")
+    print("\nSmoke test - 5 steps at choke=50%, all variants:")
     print(f"  {'Variant':<12} {'Q':>8} {'WHP':>8} {'FLP':>8} {'BHP':>8}")
     for v in ["baseline", "pessimistic", "optimistic"]:
         sim = WellSimulator(seed=0, variant=v)

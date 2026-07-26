@@ -32,7 +32,7 @@ except ImportError:
     LIMITS = dict(WHP_min=200, WHP_max=480, FLP_min=150, FLP_max=350,
                   BHP_min=2200, BHP_max=3000)
 
-DEAD_BAND = 3.0   # bbl/hr — must match controller ControllerConfig.dead_band
+DEAD_BAND = 3.0   # bbl/hr - must match controller ControllerConfig.dead_band
 
 SCENARIOS = {
     "A": dict(

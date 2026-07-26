@@ -7,7 +7,8 @@ After  = w_ramp=0.3, dead_band=3.0 (current run)
 import sys
 import numpy as np
 import pandas as pd
-sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # ── "Before" values captured from the w_ramp=0.3 / no-dead-band run ──────────
 BEFORE = {
@@ -87,7 +88,7 @@ for s in ["A", "B", "C"]:
         if isinstance(bv, float) or isinstance(bv, int):
             delta_str = f"{av - bv:+.1f}"
         else:
-            delta_str = "—"
+            delta_str = "-"
         bv_str = f"{bv:.1f}" if isinstance(bv, (float, int)) else str(bv)
         av_str = f"{av:.1f}"
         print(f"  {label:<40} {bv_str:>10}  {av_str:>10}  {delta_str:>10}")

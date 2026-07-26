@@ -1,0 +1,64 @@
+================================================================================
+AUTOMATED PRODUCTION CHOKE CONTROLLER FOR A SINGLE NATURALLY FLOWING WELL
+Honeywell Hackathon - Master Submission Package
+================================================================================
+
+1. EXECUTIVE SUMMARY & DELIVERABLE OVERVIEW
+--------------------------------------------------------------------------------
+This package contains the complete, production-ready autonomous choke control
+solution developed for Honeywell's single naturally flowing oil well challenge.
+The submission contains:
+
+  - choke_controller_final_submission.ipynb : Executable Master Jupyter Notebook
+  - choke_controller_final_submission.pdf   : Standalone PDF Technical Report
+  - SUBMISSION_NOTES.txt                   : Deliverables summary & deployment guide
+  - SWAP_CHECKLIST.md                      : One-line real-simulator swap protocol
+  - Python Code Files:
+      * controller.py            : Constraint-aware MPC with dead-band cost function
+      * model.py                 : ARX dynamic model identification & C_v curve fit
+      * mock_simulator.py        : Plant simulator (baseline, pessimistic, optimistic)
+      * step_test_harness.py     : Automated open-loop step-test data collection
+      * run_scenarios.py         : Closed-loop execution engine (Scenarios A, B, C)
+      * stress_test_all_variants.py : 3x3 robustness matrix test suite (57 checks)
+      * dashboard.py             : Streamlit interactive monitoring dashboard
+  - Scenario Data CSVs:
+      * mock_step_test_data.csv
+      * mock_scenario_A.csv / mock_scenario_A_rationale.csv
+      * mock_scenario_B.csv / mock_scenario_B_rationale.csv
+      * mock_scenario_C.csv / mock_scenario_C_rationale.csv
+  - Technical Visualizations (PNG):
+      * mock_step_test_plot.png
+      * mock_model_validation.png
+      * mock_final_scenario_A_plot.png
+      * mock_final_scenario_B_plot.png
+      * mock_final_scenario_C_plot.png
+      * choke_controller_architecture.png
+
+2. LIVE DASHBOARD DEPLOYMENT
+--------------------------------------------------------------------------------
+Streamlit Cloud Live App URL:
+https://choke-controller-honeywell-rish.streamlit.app/
+
+3. KEY TECHNICAL HIGHLIGHTS
+--------------------------------------------------------------------------------
+- Dynamic Model Accuracy: ARX model achieves R² > 0.99 across all state variables
+  (Oil Rate Q, WHP, FLP, BHP).
+- Dead-Band Chatter Elimination: 3.0 bbl/hr zero-cost dead-band suppresses choke
+  hunting completely, maintaining 0.0% settled oscillation range.
+- Constraint Compliance: Strict candidate grid search enforces max ramp rate of
+  ±5.0%/hr and zero pressure constraint violations across all scenarios.
+- Safety Guard Margin: 3.0 psi explicit margin prevents transient pressure drops
+  from breaching safety thresholds even under pessimistic plant dynamics.
+- Robustness: 57 out of 57 checks passed in a 3x3 matrix (3 scenarios x 3 plant variants).
+
+4. QUICK-START EXECUTION GUIDE
+--------------------------------------------------------------------------------
+To run locally:
+  1. Install dependencies:
+     pip install -r requirements.txt
+
+  2. Run the interactive Streamlit dashboard:
+     streamlit run dashboard.py
+
+  3. Execute the full Master Notebook:
+     jupyter nbconvert --execute --to notebook --inplace choke_controller_final_submission.ipynb

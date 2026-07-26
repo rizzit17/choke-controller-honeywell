@@ -13,7 +13,8 @@ Usage:
 import sys
 import numpy as np
 import pandas as pd
-sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 from mock_simulator import WellSimulator, LIMITS
 from model import load_model
@@ -97,7 +98,7 @@ def check_run(df: pd.DataFrame, scenario: str, variant: str):
     results.append((f"[{variant}/{scenario}] no_WHP_violation", ok,
                     f"{viol} steps violated | raw_min_hdroom={headroom_lo:.1f} psi"))
 
-    # FLP (raw limit — hard rejection uses adjusted, but pass/fail checks raw)
+    # FLP (raw limit - hard rejection uses adjusted, but pass/fail checks raw)
     viol = int(((df.FLP_psi < LIMITS["FLP_min"]) | (df.FLP_psi > LIMITS["FLP_max"])).sum())
     ok = (viol == 0)
     headroom_lo = float(df.FLP_psi.min() - LIMITS["FLP_min"])
@@ -201,7 +202,7 @@ def detailed_margins(df: pd.DataFrame, scenario: str) -> dict:
 
 def main():
     print("\n" + "=" * 78)
-    print("STRESS-TEST: 3 Scenarios x 3 Variants — hard_margin=3.0 (LOCKED CONFIG)")
+    print("STRESS-TEST: 3 Scenarios x 3 Variants - hard_margin=3.0 (LOCKED CONFIG)")
     print(f"  FLP effective rejection threshold: {LIMITS['FLP_min'] + HARD_MARGIN:.0f} psi  "
           f"(raw 150 + margin 3)")
     print(f"  BHP effective rejection threshold: {LIMITS['BHP_min'] + HARD_MARGIN:.0f} psi  "
@@ -260,8 +261,8 @@ def main():
         for scenario in SCENARIOS:
             d = all_details[(variant, scenario)]
             b = _BEFORE.get((variant, scenario), {})
-            settled_before = b.get("settled_flp_hdroom", "—")
-            trans_before   = b.get("transient_flp_min", "—")
+            settled_before = b.get("settled_flp_hdroom", "-")
+            trans_before   = b.get("transient_flp_min", "-")
 
             # Delta indicators
             settled_after = d["flp_settled_hdroom"]
@@ -279,13 +280,13 @@ def main():
     # ── Pessimistic/C spotlight ───────────────────────────────────────────────
     d_key = all_details[("pessimistic", "C")]
     print()
-    print("  SPOTLIGHT — pessimistic/C (tightest case):")
+    print("  SPOTLIGHT - pessimistic/C (tightest case):")
     print(f"    FLP transient minimum (absolute):     {d_key['flp_transient_raw_hdroom']:+.1f} psi above raw 150 floor")
     print(f"    FLP transient minimum (vs threshold): {d_key['flp_transient_adj_hdroom']:+.1f} psi above 153 psi guard")
     if d_key["flp_transient_adj_hdroom"] > 0:
-        print(f"    Result: transient clears guard threshold — NO spurious rejection ✅")
+        print(f"    Result: transient clears guard threshold - NO spurious rejection ✅")
     else:
-        print(f"    Result: transient BELOW guard threshold — spurious rejection LIKELY ⚠")
+        print(f"    Result: transient BELOW guard threshold - spurious rejection LIKELY ⚠")
     print(f"    FLP settled headroom (vs raw 150):    {d_key['flp_settled_hdroom']:+.1f} psi")
     print(f"    Chatter moves in settled phase:       {d_key['chatter']}")
 
@@ -297,7 +298,7 @@ def main():
             print(f"  FAILED: {name}")
             print(f"    {detail}")
     else:
-        print("✅  ALL CHECKS PASSED — FINAL LOCKED CONFIG")
+        print("✅  ALL CHECKS PASSED - FINAL LOCKED CONFIG")
         print(f"    dead_band=3.0 bbl/hr  |  w_ramp=0.3  |  hard_margin=3.0 psi")
     print("=" * 78 + "\n")
 
