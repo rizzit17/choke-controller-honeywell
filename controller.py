@@ -39,7 +39,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 
-# ── Constraint limits (import from mock_simulator or override with real values) ─
+# Constraint limits (import from mock_simulator or override with real values) ─
 # When the real simulator ships, check whether it exports its own LIMITS dict.
 # If so, import from there. If not, populate from the real simulator's docs.
 try:

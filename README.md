@@ -77,11 +77,7 @@ The soft barrier rises steeply as any pressure approaches its hard limit, steeri
 
 ### Dead-Band Engineering Decision
 
-<<<<<<< HEAD
 During initial testing with a quadratic tracking cost and no dead-band, the controller exhibited **choke chattering**: after reaching the production target, the choke oscillated ±1–2% per step indefinitely rather than holding still. Root cause: once Q is within the noise floor (~±2 bbl/hr), the tracking cost and ramp cost are nearly equal for every candidate, so the controller alternates between adjacent choke positions on successive steps. This is not a safety issue - pressures remained within limits throughout - but it produces a cosmetically poor "sawtooth" settled phase and would cause unnecessary mechanical wear on a real choke valve.
-=======
-During initial testing with a quadratic tracking cost and no dead-band, the controller exhibited **choke chattering**: after reaching the production target, the choke oscillated ±1-2% per step indefinitely rather than holding still. Root cause: once Q is within the noise floor (~±2 bbl/hr), the tracking cost and ramp cost are nearly equal for every candidate, so the controller alternates between adjacent choke positions on successive steps. This is not a safety issue - pressures remained within limits throughout - but it produces a cosmetically poor "sawtooth" settled phase and would cause unnecessary mechanical wear on a real choke valve.
->>>>>>> a50729b (Final submission pipeline update: master notebook, PDF formatting, clean symbols, and docs)
 
 The fix is a **dead-band** on the tracking error: when `|predicted_Q - target_Q| ≤ dead_band` (default 3 bbl/hr, ≈2.3% of a 130 bbl/hr target), the tracking term collapses to zero and the ramp penalty dominates. The cheapest move is always Δu = 0. Chattering stops entirely, and the choke flatlines once on-target. The dead-band does **not** affect constraint logic (hard rejection and soft barrier are evaluated on absolute predicted pressures, not on tracking error), and it has zero effect on Scenario C where the choke is already physically bounded at 100%.
 
@@ -128,11 +124,7 @@ If **all** candidates violate hard limits (infeasible target), the controller ho
 
 2. **Linear model**: ARX assumes linear dynamics. If the real simulator shows strong nonlinearity (e.g., production rate vs. choke is highly curved, or time constants vary strongly with operating point), consider fitting separate linear models per operating region (piecewise ARX) without changing the controller architecture.
 
-<<<<<<< HEAD
 3. **Mock simulator calibration**: The physics-grounded steady-state model (`Q = Cv(u)·u·sqrt(ΔP)`) is calibrated to all 14 real organizer data points (choke positions 5–95%). Two values - `u=40%` (~101.3 bbl/hr) and `u=100%` (~175.1 bbl/hr) - are physics-model extrapolations with no organizer data backing and are labeled as such in `architecture.md`. Safe operating limits (`LIMITS` dict) are verified against the reference dataset range. Update after receiving the real simulator.
-=======
-3. **Mock simulator calibration**: The physics-grounded steady-state model (`Q = Cv(u)·u·sqrt(ΔP)`) is calibrated to all 14 real organizer data points (choke positions 5-95%). Two values - `u=40%` (~101.3 bbl/hr) and `u=100%` (~175.1 bbl/hr) - are physics-model extrapolations with no organizer data backing and are labeled as such in `architecture.md`. Safe operating limits (`LIMITS` dict) are verified against the reference dataset range. Update after receiving the real simulator.
->>>>>>> a50729b (Final submission pipeline update: master notebook, PDF formatting, clean symbols, and docs)
 
 4. **No dead-time modeled**: The ARX model assumes zero dead-time (immediate effect of choke change). If the real simulator shows a pure delay of D steps, add D shifted-choke terms to the feature vector in `model.py`.
 
